@@ -8,7 +8,13 @@
       <p class="comment__text">
         <slot />
       </p>
-      <button class="comment__delete" @click="deleteComment">Удалить</button>
+      <el-button
+        class="comment__delete"
+        type="danger"
+        @click="deleteComment"
+        link
+        >Удалить</el-button
+      >
     </div>
   </div>
 </template>
@@ -70,7 +76,7 @@ export default {
     color: #777;
 
     &:hover {
-      color: #a11212;
+      color: #d60e0e;
     }
   }
 }

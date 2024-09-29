@@ -11,26 +11,30 @@
       <div class="comments-block__header"><h2>Комментарии</h2></div>
       <div class="comments-block__form">
         <h3>Оставить комментарий</h3>
-        <input
+        <el-input
           v-model="newComment.username"
           class="comments-block__form__input"
-          type="text"
           placeholder="Имя"
+          size="large"
         />
-        <textarea
+        <el-input
           v-model="newComment.content"
-          class="comments-block__form__textArea"
+          maxlength="2000"
           placeholder="Текст комментария"
+          show-word-limit
+          type="textarea"
+          size="large"
+          :rows="5"
         />
         <VueHcaptcha
           sitekey="76ecbad6-4abe-4098-bcd2-f16c4e2ab424"
           @verify="alert('verifyed')"
         ></VueHcaptcha>
-        <DefaultButton @click="addComment">
-          Добавить комментарий
-        </DefaultButton>
+        <el-button type="primary" @click="addComment"
+          >Добавить комментарий</el-button
+        >
       </div>
-      <div class="comments-block__list">
+      <div class="comments-block__list" v-loading="isLoading">
         <CommentComponent
           class="comments-block__comment"
           v-for="comment in comments"
@@ -46,7 +50,6 @@
 </template>
 
 <script>
-import DefaultButton from "@/components/DefaultButton.vue";
 import CommentComponent from "@/components/CommentComponent.vue";
 import VueHcaptcha from "@hcaptcha/vue3-hcaptcha";
 
@@ -55,7 +58,6 @@ import { useStore } from "vuex";
 
 export default {
   components: {
-    DefaultButton,
     CommentComponent,
     VueHcaptcha,
   },
@@ -164,25 +166,7 @@ export default {
       margin-bottom: 15px;
     }
     &__input {
-      background-color: #f7fafc;
-      border-radius: 0.375rem;
-      border: 1px solid #cbd5e0;
-      height: 2rem;
-      padding: 0.5rem 0.75rem;
-      font-family: inherit;
-      font-size: 1rem;
-    }
-    &__textArea {
-      background-color: #f7fafc;
-      border-radius: 0.375rem;
-      border: 1px solid #cbd5e0;
-      width: 100%;
-      height: 8rem;
-      padding: 0.5rem 0.75rem;
-      font-family: inherit;
-      font-size: 1rem;
-      line-height: 1.5;
-      resize: none;
+      width: 25%;
     }
   }
 
