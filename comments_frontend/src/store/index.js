@@ -12,6 +12,9 @@ const store = createStore({
   mutations: {
     SET_COMMENTS(state, comments) {
       state.comments = comments;
+      comments.sort(
+        (a, b) => new Date(b.Comment_datetime) - new Date(a.Comment_datetime)
+      );
     },
     ADD_COMMENT(state, comment) {
       state.comments.push(comment);
