@@ -1,6 +1,6 @@
 .DS_Store
-node_modules
-/dist
+/comments_frontend/node_modules
+/comments_frontend/dist
 
 
 # local env files
