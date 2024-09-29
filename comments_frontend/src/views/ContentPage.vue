@@ -11,8 +11,17 @@
       <div class="comments-block__header"><h2>Комментарии</h2></div>
       <div class="comments-block__form">
         <h3>Оставить комментарий</h3>
-        <PrettyInput placeholder="Имя" />
-        <PrettyArea placeholder="Текст комментария" />
+        <input
+          v-model="newComment.username"
+          class="comments-block__form__input"
+          type="text"
+          placeholder="Имя"
+        />
+        <textarea
+          v-model="newComment.content"
+          class="comments-block__form__textArea"
+          placeholder="Текст комментария"
+        />
         <VueHcaptcha
           sitekey="76ecbad6-4abe-4098-bcd2-f16c4e2ab424"
           @verify="alert('verifyed')"
@@ -38,25 +47,24 @@
 
 <script>
 import DefaultButton from "@/components/DefaultButton.vue";
-import PrettyArea from "@/components/PrettyArea.vue";
-import PrettyInput from "@/components/PrettyInput.vue";
 import CommentComponent from "@/components/CommentComponent.vue";
 import VueHcaptcha from "@hcaptcha/vue3-hcaptcha";
 
-import { ref, computed, onMounted } from "vue";
+import { reactive, computed, onMounted } from "vue";
 import { useStore } from "vuex";
 
 export default {
   components: {
     DefaultButton,
-    PrettyArea,
-    PrettyInput,
     CommentComponent,
     VueHcaptcha,
   },
   setup() {
     const store = useStore();
-    const newComment = ref("");
+    const newComment = reactive({
+      username: null,
+      content: null,
+    });
 
     const comments = computed(() => store.getters.allComments);
     const isLoading = computed(() => store.getters.isLoading);
@@ -67,18 +75,20 @@ export default {
       store.dispatch("deleteComment", id);
     };
     const addComment = () => {
-      store.dispatch("addComment", {
-        Comment_username: "111",
-        Comment_content: "222",
-      });
-      if (newComment.value.trim()) {
-        store.dispatch("addComment", { username: "111", content: "222" });
-        newComment.value = ""; // Очистить поле после отправки
+      if (newComment.username && newComment.content) {
+        store.dispatch("addComment", {
+          Comment_username: newComment.username,
+          Comment_content: newComment.content,
+        });
+        newComment.username = null;
+        newComment.content = null;
+      } else {
+        alert(newComment.username);
       }
     };
 
     onMounted(() => {
-      fetchComments(); // Вызываем fetchComments при монтировании компонента
+      fetchComments();
       console.log();
     });
 
@@ -86,6 +96,7 @@ export default {
       comments,
       isLoading,
       errorMessage,
+      newComment,
       removeComment,
       addComment,
     };
@@ -151,6 +162,27 @@ export default {
     h3 {
       margin: 0;
       margin-bottom: 15px;
+    }
+    &__input {
+      background-color: #f7fafc;
+      border-radius: 0.375rem;
+      border: 1px solid #cbd5e0;
+      height: 2rem;
+      padding: 0.5rem 0.75rem;
+      font-family: inherit;
+      font-size: 1rem;
+    }
+    &__textArea {
+      background-color: #f7fafc;
+      border-radius: 0.375rem;
+      border: 1px solid #cbd5e0;
+      width: 100%;
+      height: 8rem;
+      padding: 0.5rem 0.75rem;
+      font-family: inherit;
+      font-size: 1rem;
+      line-height: 1.5;
+      resize: none;
     }
   }
 
