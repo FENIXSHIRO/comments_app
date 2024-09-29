@@ -1,6 +1,8 @@
 import axios from "axios";
 import { createStore } from "vuex";
 
+axios.defaults.baseURL = "http://localhost:8888";
+
 const store = createStore({
   state: {
     comments: [],

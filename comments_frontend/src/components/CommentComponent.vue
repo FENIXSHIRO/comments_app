@@ -1,21 +1,27 @@
 <template>
   <div class="comment">
     <div class="comment__header">
-      <p class="comment__name">Name</p>
-      <p class="comment__datetime">00:00 00.00.0000</p>
+      <p class="comment__name">{{ username }}</p>
+      <p class="comment__datetime">{{ commentDatetime }}</p>
     </div>
     <div class="comment__content">
       <p class="comment__text">
-        ContentContentContentContentConte ntContentContentC
-        ontentContentContentCon tentContentContentContentContentCo
-        ntentContentContentContentContentContentContentContentContentContentContentContentContentContentContentContentContentContentContentContentContentContentContentContentContentContentContentContentContent
+        <slot />
       </p>
       <button class="comment__delete">Удалить</button>
     </div>
   </div>
 </template>
 
-<script setup></script>
+<script>
+export default {
+  props: {
+    comment_id: Number,
+    username: String,
+    commentDatetime: String,
+  },
+};
+</script>
 
 <style lang="scss" scoped>
 .comment {

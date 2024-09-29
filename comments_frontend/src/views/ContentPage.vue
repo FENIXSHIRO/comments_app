@@ -22,7 +22,9 @@
         </DefaultButton>
       </div>
       <div class="comments-block__list">
-        <CommentComponent></CommentComponent>
+        <CommentComponent comment_id="1" username="User" commentDatetime="000"
+          >a</CommentComponent
+        >
       </div>
     </div>
   </div>
@@ -35,6 +37,9 @@ import PrettyInput from "@/components/PrettyInput.vue";
 import CommentComponent from "@/components/CommentComponent.vue";
 import VueHcaptcha from "@hcaptcha/vue3-hcaptcha";
 
+import { computed, onMounted } from "vue";
+import { useStore } from "vuex";
+
 export default {
   components: {
     DefaultButton,
@@ -42,6 +47,28 @@ export default {
     PrettyInput,
     CommentComponent,
     VueHcaptcha,
+  },
+  setup() {
+    const store = useStore();
+
+    const comments = computed(() => store.getters.allComments);
+    const isLoading = computed(() => store.getters.isLoading);
+    const errorMessage = computed(() => store.getters.errorMessage);
+
+    const fetchComments = () => store.dispatch("fetchComments");
+    const removeComment = (id) => store.dispatch("deleteComment", id);
+
+    onMounted(() => {
+      fetchComments(); // Вызываем fetchComments при монтировании компонента
+      console.log(store.state);
+    });
+
+    return {
+      comments,
+      isLoading,
+      errorMessage,
+      removeComment,
+    };
   },
 };
 </script>
