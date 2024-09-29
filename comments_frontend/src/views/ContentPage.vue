@@ -27,8 +27,9 @@
           :rows="5"
         />
         <VueHcaptcha
+          ref="captcha"
           sitekey="76ecbad6-4abe-4098-bcd2-f16c4e2ab424"
-          @verify="alert('verifyed')"
+          @verify="onCaptchaVerified"
         ></VueHcaptcha>
         <el-button type="primary" @click="addComment"
           >Добавить комментарий</el-button
@@ -40,7 +41,7 @@
           v-for="comment in comments"
           v-bind:key="comment.Comment_Id"
           :username="comment.Comment_username"
-          :commentDatetime="comment.Comment_datetime"
+          :commentDatetime="formatDate(comment.Comment_datetime)"
           @delete-comment="removeComment(comment.Comment_Id)"
           >{{ comment.Comment_content }}</CommentComponent
         >
@@ -52,8 +53,10 @@
 <script>
 import CommentComponent from "@/components/CommentComponent.vue";
 import VueHcaptcha from "@hcaptcha/vue3-hcaptcha";
+import { verifyCapthcaToken } from "@/js/verifyCapthcaToken";
+import { formatDate } from "@/js/dateFormater";
 
-import { reactive, computed, onMounted } from "vue";
+import { ref, reactive, computed, onMounted } from "vue";
 import { useStore } from "vuex";
 
 export default {
@@ -68,6 +71,8 @@ export default {
       content: null,
     });
 
+    const captcha = ref(null);
+    const captchaToken = ref(null);
     const comments = computed(() => store.getters.allComments);
     const isLoading = computed(() => store.getters.isLoading);
     const errorMessage = computed(() => store.getters.errorMessage);
@@ -76,17 +81,31 @@ export default {
     const removeComment = (id) => {
       store.dispatch("deleteComment", id);
     };
-    const addComment = () => {
-      if (newComment.username && newComment.content) {
+    const addComment = async () => {
+      if (!newComment.username && !newComment.content) {
+        alert("input");
+        return;
+      }
+      if (captchaToken.value == null) {
+        alert("captcha");
+        return;
+      }
+      let verifyResponse = await verifyCapthcaToken(captchaToken.value);
+      if (verifyResponse.success) {
         store.dispatch("addComment", {
           Comment_username: newComment.username,
           Comment_content: newComment.content,
         });
         newComment.username = null;
         newComment.content = null;
-      } else {
-        alert(newComment.username);
+        if (captcha.value) {
+          captcha.value.reset();
+        }
       }
+    };
+
+    const onCaptchaVerified = (token) => {
+      captchaToken.value = token;
     };
 
     onMounted(() => {
@@ -99,8 +118,11 @@ export default {
       isLoading,
       errorMessage,
       newComment,
+      captcha,
       removeComment,
       addComment,
+      onCaptchaVerified,
+      formatDate,
     };
   },
 };

@@ -17,7 +17,7 @@ const store = createStore({
       );
     },
     ADD_COMMENT(state, comment) {
-      state.comments.push(comment);
+      state.comments.unshift(comment);
     },
     REMOVE_COMMENT(state, commentId) {
       state.comments = state.comments.filter(
