@@ -17,13 +17,19 @@
           sitekey="76ecbad6-4abe-4098-bcd2-f16c4e2ab424"
           @verify="alert('verifyed')"
         ></VueHcaptcha>
-        <DefaultButton onclick="alert('test')">
+        <DefaultButton @click="addComment">
           Добавить комментарий
         </DefaultButton>
       </div>
       <div class="comments-block__list">
-        <CommentComponent comment_id="1" username="User" commentDatetime="000"
-          >a</CommentComponent
+        <CommentComponent
+          class="comments-block__comment"
+          v-for="comment in comments"
+          v-bind:key="comment.Comment_Id"
+          :username="comment.Comment_username"
+          :commentDatetime="comment.Comment_datetime"
+          @delete-comment="removeComment(comment.Comment_Id)"
+          >{{ comment.Comment_content }}</CommentComponent
         >
       </div>
     </div>
@@ -37,7 +43,7 @@ import PrettyInput from "@/components/PrettyInput.vue";
 import CommentComponent from "@/components/CommentComponent.vue";
 import VueHcaptcha from "@hcaptcha/vue3-hcaptcha";
 
-import { computed, onMounted } from "vue";
+import { ref, computed, onMounted } from "vue";
 import { useStore } from "vuex";
 
 export default {
@@ -50,17 +56,30 @@ export default {
   },
   setup() {
     const store = useStore();
+    const newComment = ref("");
 
     const comments = computed(() => store.getters.allComments);
     const isLoading = computed(() => store.getters.isLoading);
     const errorMessage = computed(() => store.getters.errorMessage);
 
     const fetchComments = () => store.dispatch("fetchComments");
-    const removeComment = (id) => store.dispatch("deleteComment", id);
+    const removeComment = (id) => {
+      store.dispatch("deleteComment", id);
+    };
+    const addComment = () => {
+      store.dispatch("addComment", {
+        Comment_username: "111",
+        Comment_content: "222",
+      });
+      if (newComment.value.trim()) {
+        store.dispatch("addComment", { username: "111", content: "222" });
+        newComment.value = ""; // Очистить поле после отправки
+      }
+    };
 
     onMounted(() => {
       fetchComments(); // Вызываем fetchComments при монтировании компонента
-      console.log(store.state);
+      console.log();
     });
 
     return {
@@ -68,6 +87,7 @@ export default {
       isLoading,
       errorMessage,
       removeComment,
+      addComment,
     };
   },
 };
@@ -135,11 +155,14 @@ export default {
   }
 
   &__list {
-    height: 1000px;
     margin-top: 15px;
     padding: 25px;
     border-radius: 15px;
     box-shadow: 4px 4px 30px 0px rgba(67, 67, 67, 0.2);
+  }
+
+  &__comment {
+    margin-bottom: 10px;
   }
 }
 </style>

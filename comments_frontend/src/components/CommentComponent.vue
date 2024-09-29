@@ -8,7 +8,7 @@
       <p class="comment__text">
         <slot />
       </p>
-      <button class="comment__delete">Удалить</button>
+      <button class="comment__delete" @click="deleteComment">Удалить</button>
     </div>
   </div>
 </template>
@@ -16,9 +16,17 @@
 <script>
 export default {
   props: {
-    comment_id: Number,
     username: String,
     commentDatetime: String,
+  },
+  setup(_, { emit }) {
+    const deleteComment = () => {
+      emit("delete-comment");
+    };
+
+    return {
+      deleteComment,
+    };
   },
 };
 </script>

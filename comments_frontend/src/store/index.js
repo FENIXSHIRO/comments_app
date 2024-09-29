@@ -18,7 +18,7 @@ const store = createStore({
     },
     REMOVE_COMMENT(state, commentId) {
       state.comments = state.comments.filter(
-        (comment) => comment.id !== commentId
+        (comment) => comment.Comment_Id !== commentId
       );
     },
     SET_LOADING(state, loading) {
@@ -46,7 +46,7 @@ const store = createStore({
       commit("SET_ERROR", null);
       try {
         const response = await axios.post("/comments/add", comment);
-        commit("ADD_COMMENT", response.data);
+        commit("ADD_COMMENT", response.data.comment);
       } catch (error) {
         commit("SET_ERROR", error.message);
       } finally {

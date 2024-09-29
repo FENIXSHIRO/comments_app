@@ -36,8 +36,8 @@ class CommentController
     {
         $data = $request->getParsedBody();
         try {
-            $this->comment->addComment($data['username'], $data['content']);
-            $response->getBody()->write(json_encode(['message' => 'Comment added successfully']));
+            $addedComment = $this->comment->addComment($data['Comment_username'], $data['Comment_content']);
+            $response->getBody()->write(json_encode(['message' => 'Comment added successfully', 'comment' => $addedComment]));
             return $response
                 ->withHeader('content-type', 'application/json')
                 ->withStatus(200);
