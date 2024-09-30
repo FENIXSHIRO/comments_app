@@ -40,7 +40,7 @@ Body reference
 #### Captcha token verifying
 
 ```http
-  POST /captcha/verify'
+  POST /captcha/verify
 ```
 Body
 ```json
