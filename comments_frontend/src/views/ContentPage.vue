@@ -9,32 +9,41 @@
 
     <div class="comments-block">
       <div class="comments-block__header"><h2>Комментарии</h2></div>
-      <div class="comments-block__form">
+      <el-form
+        ref="ruleFormRef"
+        :model="newComment"
+        :rules="rules"
+        label-width="auto"
+        class="comments-block__form"
+        status-icon
+      >
         <h3>Оставить комментарий</h3>
-        <el-input
-          v-model="newComment.username"
-          class="comments-block__form__input"
-          placeholder="Имя"
-          size="large"
-        />
-        <el-input
-          v-model="newComment.content"
-          maxlength="2000"
-          placeholder="Текст комментария"
-          show-word-limit
-          type="textarea"
-          size="large"
-          :rows="5"
-        />
+        <el-form-item prop="username"
+          ><el-input
+            v-model="newComment.username"
+            class="comments-block__form__input"
+            placeholder="Имя"
+            size="large"
+        /></el-form-item>
+        <el-form-item prop="content"
+          ><el-input
+            v-model="newComment.content"
+            maxlength="2000"
+            placeholder="Текст комментария"
+            show-word-limit
+            type="textarea"
+            size="large"
+            :rows="5"
+        /></el-form-item>
         <VueHcaptcha
           ref="captcha"
           sitekey="76ecbad6-4abe-4098-bcd2-f16c4e2ab424"
           @verify="onCaptchaVerified"
         ></VueHcaptcha>
-        <el-button type="primary" @click="addComment"
+        <el-button type="primary" size="large" @click="addComment(ruleFormRef)"
           >Добавить комментарий</el-button
         >
-      </div>
+      </el-form>
       <div class="comments-block__list" v-loading="isLoading">
         <CommentComponent
           class="comments-block__comment"
@@ -55,6 +64,7 @@ import CommentComponent from "@/components/CommentComponent.vue";
 import VueHcaptcha from "@hcaptcha/vue3-hcaptcha";
 import { verifyCapthcaToken } from "@/js/verifyCapthcaToken";
 import { formatDate } from "@/js/dateFormater";
+import { ElNotification } from "element-plus";
 
 import { ref, reactive, computed, onMounted } from "vue";
 import { useStore } from "vuex";
@@ -73,35 +83,72 @@ export default {
 
     const captcha = ref(null);
     const captchaToken = ref(null);
+    const ruleFormRef = ref();
     const comments = computed(() => store.getters.allComments);
     const isLoading = computed(() => store.getters.isLoading);
     const errorMessage = computed(() => store.getters.errorMessage);
 
+    const rules = reactive({
+      username: [
+        {
+          required: true,
+          message: "Введите имя пользователя",
+          trigger: "blur",
+        },
+        {
+          min: 3,
+          max: 12,
+          message: "Длина имени должна быть от 3 до 12 символов",
+          trigger: "blur",
+        },
+      ],
+      content: [
+        {
+          required: true,
+          message: "Введите сообщение",
+          trigger: "blur",
+        },
+      ],
+    });
     const fetchComments = () => store.dispatch("fetchComments");
     const removeComment = (id) => {
       store.dispatch("deleteComment", id);
     };
-    const addComment = async () => {
-      if (!newComment.username && !newComment.content) {
-        alert("input");
-        return;
-      }
+    const addComment = async (formEl) => {
+      if (!formEl) return;
       if (captchaToken.value == null) {
-        alert("captcha");
+        ElNotification({
+          title: "Неверные данные",
+          message: "Капча не пройдена",
+          type: "error",
+          position: "bottom-right",
+        });
         return;
       }
-      let verifyResponse = await verifyCapthcaToken(captchaToken.value);
-      if (verifyResponse.success) {
-        store.dispatch("addComment", {
-          Comment_username: newComment.username,
-          Comment_content: newComment.content,
-        });
-        newComment.username = null;
-        newComment.content = null;
-        if (captcha.value) {
-          captcha.value.reset();
+      await formEl.validate(async (valid) => {
+        if (valid) {
+          console.log("submit!");
+          let verifyResponse = await verifyCapthcaToken(captchaToken.value);
+          if (verifyResponse.success) {
+            store.dispatch("addComment", {
+              Comment_username: newComment.username,
+              Comment_content: newComment.content,
+            });
+            formEl.resetFields();
+            if (captcha.value) {
+              captcha.value.reset();
+            }
+          }
+        } else {
+          ElNotification({
+            title: "Неверные данные",
+            message: "Введите требуемые данные",
+            type: "error",
+            position: "bottom-right",
+          });
+          return;
         }
-      }
+      });
     };
 
     const onCaptchaVerified = (token) => {
@@ -115,6 +162,8 @@ export default {
 
     return {
       comments,
+      rules,
+      ruleFormRef,
       isLoading,
       errorMessage,
       newComment,
